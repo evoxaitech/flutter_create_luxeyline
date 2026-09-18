@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import '../../widgets/primary_button.dart';
@@ -21,19 +22,23 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _index = 0;
 
+  // Professional agent photo (larki) — onboarding + home dono mein same
+  static const String _agentPhoto =
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80';
+
   final _pages = const [
     _Slide(
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=900&q=80',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1400&q=90',
       'Find your perfect rental on Luxeyline',
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     ),
     _Slide(
-      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=900&q=80',
+      'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1400&q=90',
       'Sell for top dollar and save thousands on fees',
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     ),
     _Slide(
-      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=900&q=80',
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1400&q=90',
       'Local expertise for luxury homes',
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
     ),
@@ -109,7 +114,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                   ),
                                 ),
                               ),
-                              if (_index != 0)
+                              // Skip — screen 2 & 3 par
+                              if (i != 0)
                                 Positioned(
                                   top: 12,
                                   right: 12,
@@ -130,15 +136,21 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     ),
                                   ),
                                 ),
-                              if (i == 1)
+                              // Agent avatar (professional larki) — screen 1 & 2
+                              if (i == 0 || i == 1)
                                 Positioned(
                                   top: 12,
-                                  right: _index != 0 ? 70 : 12,
-                                  child: const CircleAvatar(
-                                    radius: 18,
-                                    backgroundColor: Colors.white,
-                                    backgroundImage: NetworkImage(
-                                        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80'),
+                                  right: i != 0 ? 70 : 12,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(2),
+                                    decoration: const BoxDecoration(
+                                        color: Colors.white,
+                                        shape: BoxShape.circle),
+                                    child: const CircleAvatar(
+                                      radius: 18,
+                                      backgroundColor: Colors.white,
+                                      backgroundImage: NetworkImage(_agentPhoto),
+                                    ),
                                   ),
                                 ),
                             ],

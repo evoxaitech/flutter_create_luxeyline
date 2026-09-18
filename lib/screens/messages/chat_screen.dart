@@ -1,39 +1,24 @@
 // screens/messages/chat_screen.dart
-//
-// Luxeyline — Agent Chat screen (screens 55 + 56 "Send photo")
-// -----------------------------------------------------------------------------
-// File yahan rakho:  lib/screens/messages/chat_screen.dart
-//
-// Messages list se yahan navigate karo:
-//   Navigator.push(context, MaterialPageRoute(
-//     builder: (_) => ChatScreen(
-//       agentName: 'Ali Hassan',
-//       agentImage: agent.imageUrl,
-//     ),
-//   ));
-//
-// Video call icon (📹) already VideoCallScreen pe wired hai.
-// Voice call + Agent profile ke liye neeche commented lines hain — jab teri
-// wo screens confirm ho jayein to un-comment kar dena.
-// -----------------------------------------------------------------------------
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:image_picker/image_picker.dart';
 
 import 'video_call_screen.dart';
-// import 'voice_call_screen.dart';     // <-- agar teri VoiceCallScreen bani hai to un-comment
-// import 'agent_profile_screen.dart';  // <-- agar teri AgentProfileScreen bani hai to un-comment
+import 'voice_call_screen.dart';
 
 class ChatMessage {
   final String text;
-  final bool isMe; // true = tumhara message, false = agent ka
+  final bool isMe;
   final String time;
-  final bool isImage; // photo message ke liye
+  final bool isImage;
+  final String? imagePath; // gallery se pick ki hui asli photo ka path
   const ChatMessage({
     required this.text,
     required this.isMe,
     required this.time,
     this.isImage = false,
+    this.imagePath,
   });
 }
 
@@ -57,26 +42,34 @@ class _ChatScreenState extends State<ChatScreen> {
 
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scroll = ScrollController();
+  final ImagePicker _picker = ImagePicker();
 
-  final List<ChatMessage> _messages = [
-    const ChatMessage(
-        text: 'Assalam o Alaikum! Luxeyline se Ali Hassan.',
-        isMe: false,
-        time: '10:30'),
-    const ChatMessage(
-        text: 'Main is 3-bed apartment ke baare mein poochna chahti thi.',
-        isMe: true,
-        time: '10:31'),
-    const ChatMessage(
-        text: 'Bilkul! Ye rahi property ki tasveer 👇',
-        isMe: false,
-        time: '10:32'),
-    const ChatMessage(text: '', isMe: false, time: '10:32', isImage: true),
-    const ChatMessage(
-        text: 'Bohot khoobsurat hai! Visit kab kar sakti hoon?',
-        isMe: true,
-        time: '10:33'),
-  ];
+  late final List<ChatMessage> _messages;
+
+  @override
+  void initState() {
+    super.initState();
+    // Greeting mein agent ka asli naam (Zareen / Tehrim / Zainab...) aata hai
+    _messages = [
+      ChatMessage(
+          text: 'Assalam o Alaikum! Luxeyline se ${widget.agentName}.',
+          isMe: false,
+          time: '10:30'),
+      const ChatMessage(
+          text: 'Main is 3-bed apartment ke baare mein poochna chahti thi.',
+          isMe: true,
+          time: '10:31'),
+      const ChatMessage(
+          text: 'Bilkul! Ye rahi property ki tasveer 👇',
+          isMe: false,
+          time: '10:32'),
+      const ChatMessage(text: '', isMe: false, time: '10:32', isImage: true),
+      const ChatMessage(
+          text: 'Bohot khoobsurat hai! Visit kab kar sakti hoon?',
+          isMe: true,
+          time: '10:33'),
+    ];
+  }
 
   @override
   void dispose() {
@@ -98,14 +91,30 @@ class _ChatScreenState extends State<ChatScreen> {
     _scrollToBottom();
   }
 
-  void _sendPhoto() {
-    // Screen 56 — "Send photo". Yahan asli image_picker lagana ho to
-    // image_picker package add karo. Abhi placeholder photo message bhejta hai.
-    setState(() {
-      _messages
-          .add(ChatMessage(text: '', isMe: true, time: _now(), isImage: true));
-    });
-    _scrollToBottom();
+  // Gallery kholo → asli photo pick karo → bhejo
+  Future<void> _sendPhoto() async {
+    try {
+      final XFile? picked = await _picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+      if (picked == null) return; // user ne cancel kar diya
+      setState(() {
+        _messages.add(ChatMessage(
+          text: '',
+          isMe: true,
+          time: _now(),
+          isImage: true,
+          imagePath: picked.path,
+        ));
+      });
+      _scrollToBottom();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Gallery nahi khul saki')),
+      );
+    }
   }
 
   String _now() {
@@ -139,24 +148,17 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _openVoiceCall() {
-    // Navigator.push(context, MaterialPageRoute(
-    //   builder: (_) => VoiceCallScreen(
-    //     agentName: widget.agentName,
-    //     agentImage: widget.agentImage,
-    //   ),
-    // ));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Voice call screen — un-comment to enable')),
-    );
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => VoiceCallScreen(
+            agentName: widget.agentName,
+            agentImage: widget.agentImage,
+          ),
+        ));
   }
 
   void _openAgentProfile() {
-    // Navigator.push(context, MaterialPageRoute(
-    //   builder: (_) => AgentProfileScreen(
-    //     agentName: widget.agentName,
-    //     agentImage: widget.agentImage,
-    //   ),
-    // ));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Agent profile — un-comment to enable')),
     );
@@ -257,22 +259,35 @@ class _ChatScreenState extends State<ChatScreen> {
 
     Widget content;
     if (m.isImage) {
-      // Photo message (screen 56)
-      content = Container(
-        width: 180,
-        height: 130,
-        decoration: BoxDecoration(
+      if (m.imagePath != null) {
+        // Gallery se pick ki hui asli photo
+        content = ClipRRect(
           borderRadius: BorderRadius.circular(16),
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF9AD8B8), Color(0xFF12B76A)],
+          child: Image.file(
+            File(m.imagePath!),
+            width: 200,
+            height: 150,
+            fit: BoxFit.cover,
           ),
-        ),
-        child: const Center(
-          child: Icon(Icons.home_rounded, color: Colors.white, size: 46),
-        ),
-      );
+        );
+      } else {
+        // Demo property photo (agent ki taraf se)
+        content = Container(
+          width: 180,
+          height: 130,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: const LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [Color(0xFF9AD8B8), Color(0xFF12B76A)],
+            ),
+          ),
+          child: const Center(
+            child: Icon(Icons.home_rounded, color: Colors.white, size: 46),
+          ),
+        );
+      }
     } else {
       content = Container(
         constraints:
@@ -342,7 +357,7 @@ class _ChatScreenState extends State<ChatScreen> {
         top: false,
         child: Row(
           children: [
-            // Photo button (screen 56)
+            // Photo button — ab ASLI gallery kholta hai
             IconButton(
               onPressed: _sendPhoto,
               icon: const Icon(Icons.add_photo_alternate_rounded,
@@ -388,14 +403,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-}
-
-// -----------------------------------------------------------------------------
-// Sirf preview ke liye — project mein ye main() hata dena.
-// -----------------------------------------------------------------------------
-void main() {
-  runApp(const MaterialApp(
-    debugShowCheckedModeBanner: false,
-    home: ChatScreen(agentName: 'Ali Hassan', agentImage: ''),
-  ));
 }

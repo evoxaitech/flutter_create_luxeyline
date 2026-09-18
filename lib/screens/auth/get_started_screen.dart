@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import '../../widgets/google_logo.dart';
 import 'login_screen.dart';
 
 class GetStartedScreen extends StatelessWidget {
@@ -23,17 +24,24 @@ class GetStartedScreen extends StatelessWidget {
                   style: TextStyle(color: AppColors.textSecondary)),
               const SizedBox(height: 40),
               _SocialButton(
-                  label: 'Sign in with Google',
-                  icon: Icons.g_mobiledata,
-                  onTap: () {}),
+                label: 'Sign in with Google',
+                icon: const GoogleLogo(size: 22),
+                onTap: () {},
+              ),
               const SizedBox(height: 14),
               _SocialButton(
-                  label: 'Sign in with Apple', icon: Icons.apple, onTap: () {}),
+                label: 'Sign in with Apple',
+                icon: const Icon(Icons.apple,
+                    color: AppColors.textPrimary, size: 22),
+                onTap: () {},
+              ),
               const SizedBox(height: 14),
               _SocialButton(
-                  label: 'Sign in with Facebook',
-                  icon: Icons.facebook,
-                  onTap: () {}),
+                label: 'Sign in with Facebook',
+                icon: const Icon(Icons.facebook,
+                    color: Color(0xFF1877F2), size: 22),
+                onTap: () {},
+              ),
               const SizedBox(height: 24),
               Row(
                 children: const [
@@ -98,7 +106,7 @@ class GetStartedScreen extends StatelessWidget {
 
 class _SocialButton extends StatelessWidget {
   final String label;
-  final IconData icon;
+  final Widget icon;
   final VoidCallback onTap;
   const _SocialButton(
       {required this.label, required this.icon, required this.onTap});
@@ -110,7 +118,7 @@ class _SocialButton extends StatelessWidget {
       height: 54,
       child: OutlinedButton.icon(
         onPressed: onTap,
-        icon: Icon(icon, color: AppColors.textPrimary),
+        icon: icon,
         label: Text(label,
             style: const TextStyle(
                 color: AppColors.textPrimary, fontWeight: FontWeight.w500)),

@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import '../../core/app_colors.dart';
 import '../../core/models/property.dart';
 import '../../core/api/favourites_service.dart';
 import '../../widgets/property_card.dart';
 import 'property_gallery_screen.dart';
 import '../booking/payment_method_screen.dart';
+import '../messages/chat_screen.dart';
+import '../messages/voice_call_screen.dart';
 
 class PropertyDetailScreen extends StatefulWidget {
   final Property property;
@@ -19,6 +23,10 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
   bool _isFav = false;
   bool _favLoading = false;
   int _featureTab = 0;
+
+  // Listing agent (professional larki) — chat/call ke liye bhi yahi
+  static const String _agentPhoto =
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80';
 
   Future<void> _toggleFav() async {
     setState(() => _favLoading = true);
@@ -37,6 +45,54 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
           : 'Something went wrong'),
       backgroundColor: ok ? AppColors.primary : Colors.red,
     ));
+  }
+
+  void _openChat() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) =>
+              const ChatScreen(agentName: 'Zareen', agentImage: _agentPhoto),
+        ));
+  }
+
+  void _openCall() {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const VoiceCallScreen(
+              agentName: 'Zareen', agentImage: _agentPhoto),
+        ));
+  }
+
+  // Har feature tab ki alag details
+  List<Widget> _featureContent() {
+    switch (_featureTab) {
+      case 1: // Exterior
+        return [
+          _featureRow('Parking', '2 Cars'),
+          _featureRow('Garden', 'Yes'),
+          _featureRow('Swimming Pool', 'Yes'),
+          _featureRow('Roof', 'Tiled'),
+          _featureRow('Facing', 'North'),
+        ];
+      case 2: // Area & Lot
+        return [
+          _featureRow('Lot Size', '1,940 sqft'),
+          _featureRow('Living Area', '1,215 sqft'),
+          _featureRow('Land Type', 'Residential'),
+          _featureRow('Floors', '2'),
+          _featureRow('Zoning', 'R-1'),
+        ];
+      default: // Interior
+        return [
+          _featureRow('Status', 'For Sale'),
+          _featureRow('Living Area', '1,215 sqft'),
+          _featureRow('Type', 'Condo'),
+          _featureRow('Year Built', '2000'),
+          _featureRow('Lifestyle', 'Beach'),
+        ];
+    }
   }
 
   @override
@@ -146,8 +202,7 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                       children: [
                         const CircleAvatar(
                           radius: 22,
-                          backgroundImage: NetworkImage(
-                              'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80'),
+                          backgroundImage: NetworkImage(_agentPhoto),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -165,12 +220,14 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                             ],
                           ),
                         ),
-                        _circleBtn(Icons.chat_bubble_outline, () {},
+                        // 💬 Message → direct Chat
+                        _circleBtn(Icons.chat_bubble_outline, _openChat,
                             bg: AppColors.primaryLight,
                             iconColor: AppColors.primary,
                             size: 40),
                         const SizedBox(width: 8),
-                        _circleBtn(Icons.call_outlined, () {},
+                        // 📞 Call → direct Voice Call
+                        _circleBtn(Icons.call_outlined, _openCall,
                             bg: AppColors.primaryLight,
                             iconColor: AppColors.primary,
                             size: 40),
@@ -264,16 +321,41 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                         style: TextStyle(
                             fontSize: 15, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 10),
+                    // ASLI interactive map (flutter_map + OpenStreetMap)
                     ClipRRect(
                       borderRadius: BorderRadius.circular(16),
                       child: SizedBox(
-                        height: 130,
+                        height: 160,
                         width: double.infinity,
                         child: Stack(
-                          fit: StackFit.expand,
                           children: [
-                            Container(color: const Color(0xFFE7ECE9)),
-                            Center(
+                            FlutterMap(
+                              options: MapOptions(
+                                initialCenter: LatLng(41.1579, -8.6291),
+                                initialZoom: 13,
+                              ),
+                              children: [
+                                TileLayer(
+                                  urlTemplate:
+                                      'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                                  userAgentPackageName: 'com.luxeyline.app',
+                                ),
+                                MarkerLayer(
+                                  markers: [
+                                    Marker(
+                                      point: LatLng(41.1579, -8.6291),
+                                      width: 44,
+                                      height: 44,
+                                      child: const Icon(Icons.location_on,
+                                          color: AppColors.danger, size: 44),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            Positioned(
+                              top: 10,
+                              left: 10,
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 10, vertical: 6),
@@ -323,11 +405,8 @@ class _PropertyDetailScreenState extends State<PropertyDetailScreen> {
                       }),
                     ),
                     const SizedBox(height: 14),
-                    _featureRow('Status', 'For Sale'),
-                    _featureRow('Living Area', '1,215 sqft'),
-                    _featureRow('Type', 'Condo'),
-                    _featureRow('Year Built', '2000'),
-                    _featureRow('Lifestyle', 'Beach'),
+                    // Content ab tab ke hisaab se badalta hai
+                    ..._featureContent(),
                     const SizedBox(height: 20),
                   ],
                 ),

@@ -32,44 +32,43 @@ class _MessagesScreenState extends State<MessagesScreen> {
 
   final _conversations = const [
     _Conversation('Zareen', "Hi! I'm interested in the 2-bedroom...", '9:00', 2,
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=200&q=80'),
+        'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80'),
     _Conversation(
-        'James Michael',
+        'Tehrim',
         "That works for me. I'll send you the...",
         '9:12',
         2,
-        'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80'),
+        'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&q=80'),
     _Conversation(
-        'John David',
+        'Zile',
         'Yes, the apartment comes with one parki...',
         '9:20',
         0,
-        'https://images.unsplash.com/photo-1560185127-6ed189bf02f4?w=200&q=80'),
+        'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80'),
     _Conversation(
-        'Sophia Rose',
+        'Zainab',
         'Sure, just let me know if you have any ot...',
         '9:30',
         0,
-        'https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=200&q=80'),
-    _Conversation('David Wilson', 'Thanks for the tour yesterday!', '8:05', 0,
-        'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=200&q=80',
+        'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80'),
+    _Conversation('Hira', 'Thanks for the tour yesterday!', '8:05', 0,
+        'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?w=200&q=80',
         archived: true),
   ];
 
-  // Selected tab ke hisaab se list filter
   List<_Conversation> get _filtered {
     switch (_tab) {
-      case 1: // Read  → unread == 0 aur archived nahi
+      case 1:
         return _conversations
             .where((c) => c.unread == 0 && !c.archived)
             .toList();
-      case 2: // Unread → unread > 0 aur archived nahi
+      case 2:
         return _conversations
             .where((c) => c.unread > 0 && !c.archived)
             .toList();
-      case 3: // Archived
+      case 3:
         return _conversations.where((c) => c.archived).toList();
-      default: // All → archived ke ilawa sab
+      default:
         return _conversations.where((c) => !c.archived).toList();
     }
   }

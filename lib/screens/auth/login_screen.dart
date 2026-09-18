@@ -3,6 +3,7 @@ import '../../core/app_colors.dart';
 import '../../core/api/auth_service.dart';
 import '../../widgets/custom_text_field.dart';
 import '../../widgets/primary_button.dart';
+import '../../widgets/google_logo.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
 import '../home/main_nav_screen.dart';
@@ -28,6 +29,7 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
+  // ======== API LOGIC — bilkul same, kuch nahi chhera ========
   Future<void> _login() async {
     if (_email.text.trim().isEmpty || _password.text.trim().isEmpty) {
       _snack('Please enter email and password');
@@ -55,6 +57,7 @@ class _LoginScreenState extends State<LoginScreen> {
       _snack(result['message']?.toString() ?? 'Login failed');
     }
   }
+  // ===========================================================
 
   void _snack(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
@@ -130,19 +133,14 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: const [
-                  _SocialCircle(
-                      child: Text('G',
-                          style: TextStyle(
-                              color: Color(0xFF4285F4),
-                              fontWeight: FontWeight.w900,
-                              fontSize: 16))),
+                  _SocialCircle(child: GoogleLogo(size: 22)),
                   SizedBox(width: 16),
                   _SocialCircle(
-                      child: Icon(Icons.apple, color: Colors.black, size: 20)),
+                      child: Icon(Icons.apple, color: Colors.black, size: 22)),
                   SizedBox(width: 16),
                   _SocialCircle(
                       child: Icon(Icons.facebook,
-                          color: Color(0xFF1877F2), size: 20)),
+                          color: Color(0xFF1877F2), size: 22)),
                 ],
               ),
               const SizedBox(height: 28),

@@ -3,11 +3,19 @@ import '../../core/app_colors.dart';
 import '../../core/api/token_storage.dart';
 import '../auth/login_screen.dart';
 import '../notifications/notifications_screen.dart';
+import 'personal_data_screen.dart';
+import 'payment_account_screen.dart';
+import 'my_listings_screen.dart';
+import 'bookings_tours_screen.dart';
+import 'help_center_screen.dart';
+import 'settings_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
-  // Logout — confirm popup + token clear + Login pe bhejo
+  static const String _userPhoto =
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&q=80';
+
   void _logout(BuildContext context) {
     showDialog(
       context: context,
@@ -24,9 +32,9 @@ class ProfileScreen extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () async {
-              await TokenStorage.clearToken(); // token hatao
+              await TokenStorage.clearToken();
               if (!context.mounted) return;
-              Navigator.pop(dialogContext); // popup band
+              Navigator.pop(dialogContext);
               Navigator.pushAndRemoveUntil(
                 context,
                 MaterialPageRoute(builder: (_) => const LoginScreen()),
@@ -45,6 +53,10 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  void _go(BuildContext context, Widget screen) {
+    Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,27 +70,38 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Row(
               children: [
-                const CircleAvatar(
-                  radius: 34,
-                  backgroundImage: NetworkImage(
-                      'https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=200&q=80'),
+                Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border:
+                        Border.all(color: AppColors.primaryLight, width: 2.5),
+                  ),
+                  child: const CircleAvatar(
+                    radius: 34,
+                    backgroundImage: NetworkImage(_userPhoto),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: const [
-                      Text('Alexander Bennett',
+                      Text('Zareen',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w700)),
+                              fontSize: 17, fontWeight: FontWeight.w700)),
                       SizedBox(height: 4),
-                      Text('alexander.bennett@email.com',
+                      Text('zareen@luxeyline.com',
                           style: TextStyle(
                               fontSize: 12, color: AppColors.textSecondary)),
                     ],
                   ),
                 ),
-                const Icon(Icons.edit, color: AppColors.primary, size: 20),
+                GestureDetector(
+                  onTap: () => _go(context, const PersonalDataScreen()),
+                  child: const Icon(Icons.edit,
+                      color: AppColors.primary, size: 20),
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -86,38 +109,37 @@ class ProfileScreen extends StatelessWidget {
               _ProfileTile(
                   icon: Icons.person_outline,
                   label: 'Personal Information',
-                  onTap: () {}),
+                  onTap: () => _go(context, const PersonalDataScreen())),
               _ProfileTile(
                   icon: Icons.notifications_none,
                   label: 'Notifications',
-                  onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => const NotificationsScreen()))),
+                  onTap: () => _go(context, const NotificationsScreen())),
               _ProfileTile(
                   icon: Icons.payment_outlined,
                   label: 'Payment Methods',
-                  onTap: () {}),
+                  onTap: () => _go(context, const PaymentAccountScreen())),
             ]),
             const SizedBox(height: 20),
             _section('Property', [
               _ProfileTile(
                   icon: Icons.home_work_outlined,
                   label: 'My Listings',
-                  onTap: () {}),
+                  onTap: () => _go(context, const MyListingsScreen())),
               _ProfileTile(
                   icon: Icons.calendar_today_outlined,
                   label: 'Bookings & Tours',
-                  onTap: () {}),
+                  onTap: () => _go(context, const BookingsToursScreen())),
             ]),
             const SizedBox(height: 20),
             _section('Support', [
               _ProfileTile(
-                  icon: Icons.help_outline, label: 'Help Center', onTap: () {}),
+                  icon: Icons.help_outline,
+                  label: 'Help Center',
+                  onTap: () => _go(context, const HelpCenterScreen())),
               _ProfileTile(
                   icon: Icons.settings_outlined,
                   label: 'Settings',
-                  onTap: () {}),
+                  onTap: () => _go(context, const SettingsScreen())),
               _ProfileTile(
                 icon: Icons.logout,
                 label: 'Log Out',
@@ -144,9 +166,9 @@ class ProfileScreen extends StatelessWidget {
         const SizedBox(height: 10),
         Container(
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: AppColors.border),
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: AppColors.subtleShadow,
           ),
           child: Column(children: tiles),
         ),
